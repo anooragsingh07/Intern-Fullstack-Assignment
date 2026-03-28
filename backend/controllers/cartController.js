@@ -1,24 +1,47 @@
-// Cart Controller - Handles HTTP requests for shopping cart
+// ============================================
+// CART CONTROLLER
+// ============================================
+// Handles HTTP requests for shopping cart operations
+// Uses session_id to identify which user's cart to modify
+
 const Cart = require('../models/cartModel');
 
-// Helper function to get session ID from request
-// In a real app, this would come from authentication/session middleware
+// ----------------------------------------
+// HELPER: Get Session ID from Request
+// ----------------------------------------
+// Session ID identifies the user (like a temporary user ID)
+// In a real app, this would come from authentication
+// Here we use a custom header 'x-session-id'
+
 const getSessionId = (req) => {
-  // Use a header or generate a simple session ID
   return req.headers['x-session-id'] || 'default-session';
 };
 
-// Get all cart items
+// ----------------------------------------
+// GET /api/cart
+// ----------------------------------------
+// Returns all items in the user's cart
+// Uses JOIN to include product details (name, price, image)
+// Also returns total price and item count
+
 const getCartItems = async (req, res) => {
   try {
     const sessionId = getSessionId(req);
+    
+    // Get cart items with product details (uses JOIN in model)
     const items = await Cart.getItems(sessionId);
+    
+    // Calculate total price
     const total = await Cart.getTotal(sessionId);
     
+    // Calculate total number of items
+    const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
+    
+    // Send response with items, total, and count
     res.json({ 
       items, 
       total,
-      itemCount: items.reduce((sum, item) => sum + item.quantity, 0)
+      itemCount
     });
   } catch (error) {
     console.error('Error fetching cart:', error);
@@ -26,17 +49,28 @@ const getCartItems = async (req, res) => {
   }
 };
 
-// Add item to cart
+// ----------------------------------------
+// POST /api/cart
+// ----------------------------------------
+// Adds an item to the cart
+// Request body: { productId: number, quantity: number }
+// If item already exists, increases quantity
+
 const addToCart = async (req, res) => {
   try {
     const sessionId = getSessionId(req);
+    
+    // Extract data from request body
     const { productId, quantity = 1 } = req.body;
     
+    // Validate: productId is required
     if (!productId) {
       return res.status(400).json({ error: 'Product ID is required' });
     }
     
+    // Add item to cart (handles duplicate detection in model)
     const result = await Cart.addItem(sessionId, productId, quantity);
+    
     res.json({ 
       message: 'Item added to cart', 
       ...result 
@@ -47,12 +81,22 @@ const addToCart = async (req, res) => {
   }
 };
 
-// Update cart item quantity
+// ----------------------------------------
+// PUT /api/cart/:id
+// ----------------------------------------
+// Updates the quantity of a cart item
+// URL param: id (cart item ID)
+// Request body: { quantity: number }
+
 const updateCartItem = async (req, res) => {
   try {
+    // Get cart item ID from URL
     const { id } = req.params;
+    
+    // Get new quantity from request body
     const { quantity } = req.body;
     
+    // Validate: quantity must be at least 1
     if (!quantity || quantity < 1) {
       return res.status(400).json({ error: 'Valid quantity is required' });
     }
@@ -65,7 +109,12 @@ const updateCartItem = async (req, res) => {
   }
 };
 
-// Remove item from cart
+// ----------------------------------------
+// DELETE /api/cart/:id
+// ----------------------------------------
+// Removes a single item from the cart
+// URL param: id (cart item ID)
+
 const removeFromCart = async (req, res) => {
   try {
     const { id } = req.params;
@@ -77,7 +126,11 @@ const removeFromCart = async (req, res) => {
   }
 };
 
-// Clear entire cart
+// ----------------------------------------
+// DELETE /api/cart
+// ----------------------------------------
+// Clears all items from the cart
+
 const clearCart = async (req, res) => {
   try {
     const sessionId = getSessionId(req);

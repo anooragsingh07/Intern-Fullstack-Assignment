@@ -1,74 +1,116 @@
-// Cart Model - Handles all database operations for shopping cart
+// ============================================
+// CART MODEL
+// ============================================
+// This file contains all database queries related to the shopping cart
+// Uses JOIN to fetch product details along with cart items
+
 const { pool } = require('../config/db');
 
 const Cart = {
-  // Get all items in cart (using session_id to identify cart)
+  
+  // ----------------------------------------
+  // GET ALL CART ITEMS (with product details)
+  // ----------------------------------------
+  // Uses JOIN to combine cart and products tables
+  // This way we get product name, price, image along with quantity
+  //
+  // SQL Explanation:
+  // - SELECT: Choose which columns to return
+  // - FROM cart c: "c" is an alias (shortcut) for cart table
+  // - JOIN products p: Combine with products table (alias "p")
+  // - ON c.product_id = p.id: Match cart items to their products
+  // - WHERE c.session_id = ?: Only get items for this user
+  
   getItems: async (sessionId) => {
-    const [rows] = await pool.query(
-      `SELECT c.id, c.quantity, p.id as product_id, p.name, p.price, p.image_url,
-              (c.quantity * p.price) as subtotal
-       FROM cart c
-       JOIN products p ON c.product_id = p.id
-       WHERE c.session_id = ?`,
-      [sessionId]
-    );
+    const query = `
+      SELECT 
+        c.id,                           
+        c.quantity,                     
+        p.id AS product_id,             
+        p.name,                         
+        p.price,                        
+        p.image_url,
+        (c.quantity * p.price) AS subtotal  
+      FROM cart c
+      JOIN products p ON c.product_id = p.id
+      WHERE c.session_id = ?
+    `;
+    const [rows] = await pool.query(query, [sessionId]);
     return rows;
   },
 
-  // Add item to cart
+  // ----------------------------------------
+  // ADD ITEM TO CART
+  // ----------------------------------------
+  // First checks if item already exists in cart
+  // If yes: Update quantity (add more)
+  // If no: Insert new row
+  
   addItem: async (sessionId, productId, quantity = 1) => {
-    // Check if item already exists in cart
-    const [existing] = await pool.query(
-      'SELECT id, quantity FROM cart WHERE session_id = ? AND product_id = ?',
-      [sessionId, productId]
-    );
+    // Step 1: Check if this product is already in user's cart
+    const checkQuery = 'SELECT id, quantity FROM cart WHERE session_id = ? AND product_id = ?';
+    const [existing] = await pool.query(checkQuery, [sessionId, productId]);
 
     if (existing.length > 0) {
-      // Update quantity if item exists
+      // Product exists in cart - update quantity
       const newQuantity = existing[0].quantity + quantity;
-      await pool.query(
-        'UPDATE cart SET quantity = ? WHERE id = ?',
-        [newQuantity, existing[0].id]
-      );
+      const updateQuery = 'UPDATE cart SET quantity = ? WHERE id = ?';
+      await pool.query(updateQuery, [newQuantity, existing[0].id]);
       return { id: existing[0].id, quantity: newQuantity };
     } else {
-      // Insert new item if it doesn't exist
-      const [result] = await pool.query(
-        'INSERT INTO cart (session_id, product_id, quantity) VALUES (?, ?, ?)',
-        [sessionId, productId, quantity]
-      );
+      // Product not in cart - insert new item
+      const insertQuery = 'INSERT INTO cart (session_id, product_id, quantity) VALUES (?, ?, ?)';
+      const [result] = await pool.query(insertQuery, [sessionId, productId, quantity]);
       return { id: result.insertId, quantity };
     }
   },
 
-  // Update item quantity in cart
+  // ----------------------------------------
+  // UPDATE CART ITEM QUANTITY
+  // ----------------------------------------
+  // SQL: UPDATE cart SET quantity = ? WHERE id = ?
+  
   updateQuantity: async (cartId, quantity) => {
-    await pool.query(
-      'UPDATE cart SET quantity = ? WHERE id = ?',
-      [quantity, cartId]
-    );
+    const query = 'UPDATE cart SET quantity = ? WHERE id = ?';
+    await pool.query(query, [quantity, cartId]);
   },
 
-  // Remove item from cart
+  // ----------------------------------------
+  // REMOVE ITEM FROM CART
+  // ----------------------------------------
+  // SQL: DELETE FROM cart WHERE id = ?
+  
   removeItem: async (cartId) => {
-    await pool.query('DELETE FROM cart WHERE id = ?', [cartId]);
+    const query = 'DELETE FROM cart WHERE id = ?';
+    await pool.query(query, [cartId]);
   },
 
-  // Clear entire cart
+  // ----------------------------------------
+  // CLEAR ENTIRE CART
+  // ----------------------------------------
+  // Removes all items for a specific user
+  // Used after order is placed
+  
   clearCart: async (sessionId) => {
-    await pool.query('DELETE FROM cart WHERE session_id = ?', [sessionId]);
+    const query = 'DELETE FROM cart WHERE session_id = ?';
+    await pool.query(query, [sessionId]);
   },
 
-  // Get cart total
+  // ----------------------------------------
+  // GET CART TOTAL
+  // ----------------------------------------
+  // Uses SUM to calculate total price
+  // SUM(quantity * price) adds up all subtotals
+  
   getTotal: async (sessionId) => {
-    const [rows] = await pool.query(
-      `SELECT SUM(c.quantity * p.price) as total
-       FROM cart c
-       JOIN products p ON c.product_id = p.id
-       WHERE c.session_id = ?`,
-      [sessionId]
-    );
-    return rows[0].total || 0;
+    const query = `
+      SELECT SUM(c.quantity * p.price) AS total
+      FROM cart c
+      JOIN products p ON c.product_id = p.id
+      WHERE c.session_id = ?
+    `;
+    const [rows] = await pool.query(query, [sessionId]);
+    return rows[0].total || 0; // Return 0 if cart is empty
   }
 };
 

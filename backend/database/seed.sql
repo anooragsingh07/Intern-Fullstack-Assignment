@@ -1,33 +1,139 @@
--- Seed data for E-Commerce Database
--- Run this after schema.sql to populate sample products
+-- ============================================
+-- SEED DATA FOR E-COMMERCE DATABASE
+-- ============================================
+-- Run this file after schema.sql to add sample products
+-- Contains 10 products across 3 categories
 
 USE ecommerce_db;
 
--- Insert sample products
-INSERT INTO products (name, description, price, category, image_url, stock) VALUES
+-- Clear existing products (optional - remove if you want to keep existing data)
+-- DELETE FROM products;
 
--- Electronics
-('Wireless Headphones', 'Premium noise-cancelling wireless headphones with 30-hour battery life', 149.99, 'Electronics', 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300', 50),
-('Smart Watch', 'Fitness tracking smartwatch with heart rate monitor and GPS', 299.99, 'Electronics', 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300', 30),
-('Bluetooth Speaker', 'Portable waterproof speaker with 360-degree sound', 79.99, 'Electronics', 'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=300', 100),
-('Laptop Stand', 'Ergonomic aluminum laptop stand for better posture', 49.99, 'Electronics', 'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=300', 75),
+-- ============================================
+-- INSERT 10 SAMPLE PRODUCTS
+-- ============================================
 
--- Clothing
-('Classic White T-Shirt', 'Comfortable 100% cotton t-shirt, perfect for everyday wear', 24.99, 'Clothing', 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=300', 200),
-('Denim Jacket', 'Vintage style denim jacket with brass buttons', 89.99, 'Clothing', 'https://images.unsplash.com/photo-1576995853123-5a10305d93c0?w=300', 45),
-('Running Shoes', 'Lightweight running shoes with cushioned sole', 129.99, 'Clothing', 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300', 60),
-('Leather Belt', 'Genuine leather belt with classic buckle', 39.99, 'Clothing', 'https://images.unsplash.com/photo-1624222247344-550fb60583dc?w=300', 80),
+INSERT INTO products (name, price, description, image_url, category, stock) VALUES
 
--- Home & Kitchen
-('Coffee Maker', 'Programmable 12-cup coffee maker with thermal carafe', 69.99, 'Home & Kitchen', 'https://images.unsplash.com/photo-1517668808822-9ebb02f2a0e6?w=300', 40),
-('Stainless Steel Cookware Set', '10-piece professional cookware set', 199.99, 'Home & Kitchen', 'https://images.unsplash.com/photo-1584990347449-a5d9f800d3b5?w=300', 25),
-('Plant Pot Set', 'Modern ceramic plant pots, set of 3', 34.99, 'Home & Kitchen', 'https://images.unsplash.com/photo-1485955900006-10f4d324d411?w=300', 120),
-('Throw Blanket', 'Soft fleece throw blanket, perfect for cozy evenings', 44.99, 'Home & Kitchen', 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=300', 90),
+-- ============================================
+-- ELECTRONICS (4 products)
+-- ============================================
 
--- Books
-('JavaScript: The Good Parts', 'Essential guide to JavaScript programming', 29.99, 'Books', 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=300', 150),
-('Clean Code', 'A handbook of agile software craftsmanship', 39.99, 'Books', 'https://images.unsplash.com/photo-1532012197267-da84d127e765?w=300', 100),
-('The Design of Everyday Things', 'Classic book on user-centered design', 24.99, 'Books', 'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=300', 80);
+(
+    'Wireless Bluetooth Headphones',
+    79.99,
+    'Premium noise-cancelling wireless headphones with 30-hour battery life, deep bass, and comfortable over-ear cushions. Perfect for music lovers and professionals.',
+    'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400',
+    'Electronics',
+    50
+),
 
--- Verify the data was inserted
-SELECT CONCAT('Inserted ', COUNT(*), ' products') as status FROM products;
+(
+    'Smart Watch Pro',
+    199.99,
+    'Advanced fitness tracking smartwatch with heart rate monitor, GPS, sleep tracking, and 7-day battery life. Water resistant up to 50 meters.',
+    'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400',
+    'Electronics',
+    35
+),
+
+(
+    'Portable Bluetooth Speaker',
+    49.99,
+    'Compact waterproof speaker with 360-degree sound, 12-hour playtime, and built-in microphone for hands-free calls. Perfect for outdoor adventures.',
+    'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=400',
+    'Electronics',
+    100
+),
+
+(
+    'Wireless Earbuds Pro',
+    129.99,
+    'True wireless earbuds with active noise cancellation, transparency mode, and premium sound quality. Includes wireless charging case with 24-hour total battery.',
+    'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=400',
+    'Electronics',
+    75
+),
+
+-- ============================================
+-- FASHION (3 products)
+-- ============================================
+
+(
+    'Classic Denim Jacket',
+    89.99,
+    'Timeless denim jacket with vintage wash finish, brass buttons, and comfortable cotton lining. Available in multiple sizes. Perfect for casual everyday wear.',
+    'https://images.unsplash.com/photo-1576995853123-5a10305d93c0?w=400',
+    'Fashion',
+    40
+),
+
+(
+    'Premium Leather Sneakers',
+    149.99,
+    'Handcrafted leather sneakers with cushioned insole, durable rubber outsole, and minimalist design. Comfortable for all-day wear.',
+    'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400',
+    'Fashion',
+    60
+),
+
+(
+    'Cotton Casual T-Shirt',
+    29.99,
+    '100% organic cotton t-shirt with relaxed fit and reinforced stitching. Soft, breathable, and perfect for everyday comfort. Pre-shrunk fabric.',
+    'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400',
+    'Fashion',
+    200
+),
+
+-- ============================================
+-- BOOKS (3 products)
+-- ============================================
+
+(
+    'The Art of Programming',
+    39.99,
+    'Comprehensive guide to modern software development covering algorithms, data structures, and best practices. Perfect for beginners and intermediate developers.',
+    'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400',
+    'Books',
+    80
+),
+
+(
+    'Business Strategy Masterclass',
+    34.99,
+    'Learn proven strategies from top business leaders. Covers market analysis, competitive positioning, and growth hacking techniques for startups and enterprises.',
+    'https://images.unsplash.com/photo-1532012197267-da84d127e765?w=400',
+    'Books',
+    65
+),
+
+(
+    'Mindfulness and Productivity',
+    24.99,
+    'Transform your daily routine with practical mindfulness techniques. Boost focus, reduce stress, and achieve work-life balance with science-backed methods.',
+    'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=400',
+    'Books',
+    90
+);
+
+-- ============================================
+-- VERIFY INSERTED DATA
+-- ============================================
+
+SELECT 
+    id,
+    name,
+    price,
+    category,
+    stock
+FROM products
+ORDER BY category, name;
+
+-- Show count by category
+SELECT 
+    category,
+    COUNT(*) as product_count,
+    ROUND(AVG(price), 2) as avg_price
+FROM products
+GROUP BY category;
